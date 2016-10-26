@@ -1,4 +1,4 @@
 # OscarPredictions
 
 Predicting the Oscars using Data Analysis
-added csv
+added csv, reconfiguring email
