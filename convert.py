@@ -1,8 +1,5 @@
 import pandas
 
-
-
-
 def accuracy(new, awardStr):
 	correct 		= new[new[awardStr] == True]['Year'].count()
 	notcorrect 		= new[new[awardStr] == False]['Year'].count()
@@ -28,31 +25,33 @@ for row in history.iterrows():
 	new 		= new.append(PandaSeries, ignore_index = True)
 
 
-
 accuracy(new, 'Critics Choice')
 accuracy(new, 'Producers')
 accuracy(new, 'DAG Director')
 accuracy(new, 'BAFTA')
 
-
-
 movieList = []
 
 for row in history.iterrows():
-	for x in range(0,4):
+	for x in range(0,5):
 		 movie = str(row[1][x]).strip()
 		 if movie not in movieList:
 		 	movieList.append(movie)
 
-
+count = 0
 for ele in movieList:
-	cc 		=  history[history['Critics Choice'] == ele]["Year"].count()
-	prod 	= history[history['Producers'] == ele]["Year"].count()
-	dag 	= history[history['DAG Director'] == ele]["Year"].count()
-	bafta 	= history[history['BAFTA'] == ele]["Year"].count()
-	winner 	= history[history['Oscar Winner'] == ele]["Year"].count()
+	cc 		=  history[history['Critics Choice'].str.strip() == ele]["Year"].count()
+	prod 	= history[history['Producers'].str.strip() == ele]["Year"].count()
+	dag 	= history[history['DAG Director'].str.strip() == ele]["Year"].count()
+	bafta 	= history[history['BAFTA'].str.strip() == ele]["Year"].count()
+	winner 	= history[history['Oscar Winner'].str.strip() == ele]["Year"].count()
+	
+	print ele, winner
+
+	if winner == 1:
+		count += 1
 
 	PandaSeries = pandas.Series({ "Critics Choice": cc, "Producers": prod, "DAG Director" : dag, "BAFTA" : bafta,  "Oscar Winner" : winner  })
 	new1 		= new1.append(PandaSeries, ignore_index = True)
 
-new1.to_csv("temp.csv")
+new1.to_csv("temp.csv",index = False)
