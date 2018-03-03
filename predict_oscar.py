@@ -6,11 +6,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 
-import subprocess, os, graphviz
+import subprocess, os
 import pandas as pd
 
+#model object
 class Modeler():
     def runCVModel(self,ele, X_train, X_test, y_train, y_test):
+        #no paramater is Logistic Regression, two parameters if not
         if str(ele).startswith("Log"):
             paramters = {}
         else:
@@ -19,23 +21,16 @@ class Modeler():
         clf.fit(X_train, y_train)
         tree_model = clf.best_estimator_
         predicted = tree_model.predict(X_test)
-            # summarize the fit of the model
+         # summarize the fit of the model
         print(metrics.classification_report(y_test, predicted))
         print(metrics.confusion_matrix(y_test, predicted))
         print(accuracy_score(y_test, predicted))
 
 if __name__ == '__main__':
-    os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
-    df = pd.read_csv(r"C:\Users\hh769nn\PycharmProjects\Oscar_Prediction\past_historical_data.csv")
+    #os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+    df = pd.read_csv("past_historical_data.csv")
 
-    #art_directors_guild_winner_categories
-    #writers_guild_winner_categories
-    #costume_designers_guild_winner_categories
-    #online_film_television_association_winner_categories
-    #df['online_film_critics_society_winner_categories_best_film_yes']       = df['online_film_television_association_winner_categories'].str.find("Best Film") > -1
-    #df['online_film_critics_society_winner_categories_best_picture_yes']    = df['online_film_television_association_winner_categories'].str.find("Best Picture") > -1
-    #people_choice_winner_categories
-
+    #past award data read as "Best Film; Best Actress" which needs to be converted into discrete categories
     df['bafta_winner_categories_yes']                                       = (df['bafta_winner_categories'].str.find("Best Film") > -1) & (df['bafta_winner_categories'].str.find("Best Film not") <= -1)
     df['screen_actors_guild_winner_categories_yes']                         = df['screen_actors_guild_winner_categories'].str.find("Cast") > -1
     df['critics_choice_winner_categories_yes']                              = df['critics_choice_winner_categories'].str.find("Best Picture") > -1
@@ -50,38 +45,24 @@ if __name__ == '__main__':
     df['new_york_film_critics_circle_winner_categories_yes']                = df['new_york_film_critics_circle_winner_categories'].str.find("Best Film") > -1
     df['los_angeles_film_critics_association_winner_categories_yes']        = df['los_angeles_film_critics_association_winner_categories'].str.find("Best Picture") > -1
 
+    #using only the newly created discrete award show data as features for our models
     featureLst = []
     for ele in df.columns:
         if ele.find("yes") > -1:
             featureLst.append(ele)
 
-    #featureLst.append("critic_reviews")
-    #featureLst.append("awards_nominations")
 
+    #setting the x and y vectors       
     y = df["oscar_best_picture_winner"]
     X = df[featureLst]
 
+    #spliting the data set into traing and testing
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=23)
-    paramters = {'max_depth': range(3,20)}
-
-    clf = GridSearchCV(RandomForestClassifier(max_depth=25, random_state=0), paramters, n_jobs= 4)
-    #paramters = {}
-    #clf = GridSearchCV(LogisticRegression(),paramters, n_jobs= 10)
-
+    
+    #creating the list of models to test, and for looping thru the list of models thru modeler object cross validation
     modelList = [RandomForestClassifier(max_depth=20, random_state=0),LogisticRegression(), DecisionTreeClassifier()]
-    #clf = DecisionTreeClassifier(min_samples_split=20, random_state=99)
-    #clf = RandomForestClassifier(max_depth=10, random_state=0)
-    #clf = LogisticRegression()
     model = Modeler()
     for ele in modelList:
         model.runCVModel(ele,X_train, X_test, y_train, y_test )
 
 
-'''
-    dot_data = export_graphviz(clf, out_file=None,
-                             feature_names=featureLst,
-                             class_names=df.oscar_best_picture_winner,
-                             filled=True, rounded=True,
-                             special_characters=True)
-    graph = graphviz.Source(dot_data)
-'''
