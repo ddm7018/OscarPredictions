@@ -8,6 +8,8 @@ from sklearn.linear_model import LogisticRegression
 
 import subprocess, os
 import pandas as pd
+import pickle
+
 
 #model object
 class Modeler():
@@ -63,6 +65,9 @@ if __name__ == '__main__':
     modelList = [RandomForestClassifier(max_depth=20, random_state=0),LogisticRegression(), DecisionTreeClassifier()]
     model = Modeler()
     for ele in modelList:
-        model.runCVModel(ele,X_train, X_test, y_train, y_test )
+        model.runCVModel(ele,X_train, X_test, y_train, y_test)
+        filename = "models/"+str(ele.__class__).split(".")[-1].split("'")[0]+".sav"
+        pickle.dump(model, open(filename, 'wb'))
+
 
 
